@@ -5,16 +5,17 @@ struct Wrapper<F, O, T> {
     pd: PhantomData<(T, O)>,
 }
 
-impl<F, O, T> Wrapper<F, O, T>
+impl<'a, F, O, T> Wrapper<F, O, T>
 where
-    F: FnOnce(&T) -> O,
-    O: Debug,
+    T: 'static,
+    F: FnOnce(&'a T) -> O,
+    O: 'a + Debug,
 {
     fn new(f: F) -> Wrapper<F, O, T> {
         Wrapper { f, pd: PhantomData }
     }
 
-    fn foo(self, t: &T) {
+    fn foo(self, t: &'a T) {
         let r = (self.f)(t);
         println!("result: {:?}", r);
     }
