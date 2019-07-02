@@ -21,5 +21,6 @@ where
 }
 
 fn main() {
-    Wrapper::new(|i: &String| i.as_str()).foo(&String::new());
+    let s = String::new();
+    Wrapper::new(|i: &String| i.as_str()).foo(&s);
 }
