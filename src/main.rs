@@ -2,26 +2,30 @@ use std::{fmt::Debug, marker::PhantomData};
 
 struct Wrapper<F, O, T> {
     f: F,
-    pd: PhantomData<(T, O)>,
+    state: T,
+    pd: PhantomData<O>,
 }
 
-impl<'a, F, O, T> Wrapper<F, O, T>
+impl<F, O, T> Wrapper<F, O, T>
 where
     T: 'static,
-    F: FnOnce(&'a T) -> O,
-    O: 'a + Debug,
+    F: FnOnce(&T) -> O,
+    O: Debug,
 {
-    fn new(f: F) -> Wrapper<F, O, T> {
-        Wrapper { f, pd: PhantomData }
+    fn new(state: T, f: F) -> Self {
+        Wrapper {
+            state,
+            f,
+            pd: PhantomData,
+        }
     }
 
-    fn foo(self, t: &'a T) {
-        let r = (self.f)(t);
+    fn foo(self) {
+        let r = (self.f)(&self.state);
         println!("result: {:?}", r);
     }
 }
 
 fn main() {
-    let s = String::new();
-    Wrapper::new(|i: &String| i.as_str()).foo(&s);
+    Wrapper::new(String::new(), |i: &String| i.as_str()).foo();
 }
