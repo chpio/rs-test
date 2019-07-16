@@ -1,22 +1,32 @@
+#![feature(generic_associated_types)]
 use std::{fmt::Debug, marker::PhantomData};
 
-struct Wrapper<F, O, T> {
+struct Wrapper<F, T> {
     f: F,
     state: T,
-    pd: PhantomData<O>,
+    // pd: PhantomData<O>,
 }
 
-impl<F, O, T> Wrapper<F, O, T>
+
+trait WrapperTrait {
+    type OUTPUT<'a>: 'a + Debug;
+}
+
+impl<O, F, T> WrapperTrait for Wrapper<F, T> {
+    type OUTPUT<'a> = O where O: 'a + Debug;
+}
+
+impl<F, T> Wrapper<F, T>
 where
+    Self: WrapperTrait,
     T: 'static,
-    F: FnOnce(&T) -> O,
-    O: Debug,
+    F: FnOnce(&T) -> <Self as WrapperTrait>::OUTPUT,
 {
     fn new(state: T, f: F) -> Self {
         Wrapper {
             state,
             f,
-            pd: PhantomData,
+            // pd: PhantomData,
         }
     }
 
